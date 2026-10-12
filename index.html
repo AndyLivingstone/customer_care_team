@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Выбор даты и времени</title>
+    <!-- ИСПРАВЛЕННАЯ ССЫЛКА НА СКРИПТ -->
     <script src="https://telegram.org"></script>
     <style>
         body {
@@ -47,54 +48,53 @@
     <input type="date" id="date" required>
 
     <label for="time">Укажите любое время:</label>
-    <!-- ЗАМЕНИЛИ SELECT НА INPUT TYPE=TIME (позволяет выбрать абсолютно любые часы и минуты) -->
     <input type="time" id="time" required>
 
     <button id="sendData">Подтвердить слот</button>
 
     <script>
-     const tg = window.Telegram ? window.Telegram.WebApp : null;
-
-if (tg) {
-    tg.ready();
-    tg.expand();
-} else {
-    alert("Ошибка: Скрипт Telegram WebApp не загружен!");
-}
-
-// Автозаполнение даты и времени (сегодня/сейчас)
-const today = new Date().toISOString().split('T')[0];
-document.getElementById('date').min = today;
-document.getElementById('date').value = today;
-
-const now = new Date();
-document.getElementById('time').value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-// Обработчик клика
-document.getElementById('sendData').addEventListener('click', () => {
-    const rawDate = document.getElementById('date').value;
-    const time = document.getElementById('time').value;
-
-    if (!rawDate || !time) {
-        alert("Пожалуйста, заполните дату и время");
-        return;
-    }
-
-    const [year, month, day] = rawDate.split('-');
-    const formattedDate = `${day}.${month}.${year}`;
-
-    const data = JSON.stringify({
-        date: formattedDate,
-        time: time
-    });
+    const tg = window.Telegram ? window.Telegram.WebApp : null;
 
     if (tg) {
-        tg.sendData(data); // Отправляем данные в бот
-        tg.close();        // Закрываем окно приложения
+        tg.ready();
+        tg.expand();
     } else {
-        alert("Не удалось отправить данные: запущено вне Telegram");
+        alert("Ошибка: Скрипт Telegram WebApp не загружен!");
     }
-});
+
+    // Автозаполнение даты и времени (сегодня/сейчас)
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('date').min = today;
+    document.getElementById('date').value = today;
+
+    const now = new Date();
+    document.getElementById('time').value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    // Обработчик клика
+    document.getElementById('sendData').addEventListener('click', () => {
+        const rawDate = document.getElementById('date').value;
+        const time = document.getElementById('time').value;
+
+        if (!rawDate || !time) {
+            alert("Пожалуйста, заполните дату и время");
+            return;
+        }
+
+        const [year, month, day] = rawDate.split('-');
+        const formattedDate = `${day}.${month}.${year}`;
+
+        const data = JSON.stringify({
+            date: formattedDate,
+            time: time
+        });
+
+        if (tg) {
+            tg.sendData(data); // Отправляем данные в бот
+            tg.close();        // Закрываем окно приложения
+        } else {
+            alert("Не удалось отправить данные: запущено вне Telegram");
+        }
+    });
     </script>
 </body>
 </html>
