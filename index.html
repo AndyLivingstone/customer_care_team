@@ -53,43 +53,48 @@
     <button id="sendData">Подтвердить слот</button>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+     const tg = window.Telegram ? window.Telegram.WebApp : null;
 
-        // Установка даты по умолчанию (сегодня)
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('date').min = today;
-        document.getElementById('date').value = today;
+if (tg) {
+    tg.ready();
+    tg.expand();
+} else {
+    alert("Ошибка: Скрипт Telegram WebApp не загружен!");
+}
 
-        // Установка времени по умолчанию (текущее время пользователя)
-        const now = new Date();
-        const currentHours = String(now.getHours()).padStart(2, '0');
-        const currentMinutes = String(now.getMinutes()).padStart(2, '0');
-        document.getElementById('time').value = `${currentHours}:${currentMinutes}`;
+// Автозаполнение даты и времени (сегодня/сейчас)
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('date').min = today;
+document.getElementById('date').value = today;
 
-        // Исправленный обработчик клика кнопки
-        document.getElementById('sendData').addEventListener('click', () => {
-            const rawDate = document.getElementById('date').value;
-            const time = document.getElementById('time').value; // Теперь корректно забирает строку вида "14:35"
+const now = new Date();
+document.getElementById('time').value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-            if (!rawDate || !time) {
-                alert("Пожалуйста, заполните дату и время");
-                return;
-            }
+// Обработчик клика
+document.getElementById('sendData').addEventListener('click', () => {
+    const rawDate = document.getElementById('date').value;
+    const time = document.getElementById('time').value;
 
-            const [year, month, day] = rawDate.split('-');
-            const formattedDate = `${day}.${month}.${year}`;
+    if (!rawDate || !time) {
+        alert("Пожалуйста, заполните дату и время");
+        return;
+    }
 
-            const data = JSON.stringify({
-                date: formattedDate,
-                time: time
-            });
+    const [year, month, day] = rawDate.split('-');
+    const formattedDate = `${day}.${month}.${year}`;
 
-            // Отправка в телеграм-бот
-            tg.sendData(data);
-            tg.close();
-        });
+    const data = JSON.stringify({
+        date: formattedDate,
+        time: time
+    });
+
+    if (tg) {
+        tg.sendData(data); // Отправляем данные в бот
+        tg.close();        // Закрываем окно приложения
+    } else {
+        alert("Не удалось отправить данные: запущено вне Telegram");
+    }
+});
     </script>
 </body>
 </html>
