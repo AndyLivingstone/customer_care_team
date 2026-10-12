@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Выбор даты и времени</title>
-    <!-- Подключаем официальный скрипт Telegram -->
     <script src="https://telegram.org"></script>
     <style>
         body {
@@ -18,7 +17,7 @@
             gap: 15px;
         }
         label { font-weight: bold; font-size: 14px; }
-        input, select {
+        input {
             width: 100%;
             padding: 12px;
             border: 1px solid var(--tg-theme-hint-color, #ccc);
@@ -47,49 +46,47 @@
     <label for="date">Выберите дату:</label>
     <input type="date" id="date" required>
 
-    <label for="time">Выберите время:</label>
-    <select id="time">
-        <option value="10:00">10:00</option>
-        <option value="12:00">12:00</option>
-        <option value="14:00">14:00</option>
-        <option value="16:00">16:00</option>
-        <option value="18:00">18:00</option>
-        <option value="20:00">20:00</option>
-    </select>
+    <label for="time">Укажите любое время:</label>
+    <!-- ЗАМЕНИЛИ SELECT НА INPUT TYPE=TIME (позволяет выбрать абсолютно любые часы и минуты) -->
+    <input type="time" id="time" required>
 
     <button id="sendData">Подтвердить слот</button>
 
     <script>
-        // Инициализируем Telegram Web App
         const tg = window.Telegram.WebApp;
         tg.ready();
-        tg.expand(); // Расширяем на весь экран
+        tg.expand();
 
-        // Устанавливаем минимальную дату — сегодня
+        // Установка даты по умолчанию (сегодня)
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('date').min = today;
         document.getElementById('date').value = today;
 
-        document.getElementById('sendData').addEventListener('click', () => {
-            const rawDate = document.getElementById('date').value; // ГГГГ-ММ-ДД
-            const time = document.getElementById('time').value;
+        // Установка времени по умолчанию (текущее время пользователя)
+        const now = new Date();
+        const currentHours = String(now.getHours()).padStart(2, '0');
+        const currentMinutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('time').value = `${currentHours}:${currentMinutes}`;
 
-            if (!rawDate) {
-                alert("Пожалуйста, выберите дату");
+        // Исправленный обработчик клика кнопки
+        document.getElementById('sendData').addEventListener('click', () => {
+            const rawDate = document.getElementById('date').value;
+            const time = document.getElementById('time').value; // Теперь корректно забирает строку вида "14:35"
+
+            if (!rawDate || !time) {
+                alert("Пожалуйста, заполните дату и время");
                 return;
             }
 
-            // Форматируем дату в привычный вашему боту формат ДД.ММ.ГГГГ
             const [year, month, day] = rawDate.split('-');
             const formattedDate = `${day}.${month}.${year}`;
 
-            // Формируем JSON-строку для передачи в бот
             const data = JSON.stringify({
                 date: formattedDate,
                 time: time
             });
 
-            // Отправляем данные боту и закрываем приложение
+            // Отправка в телеграм-бот
             tg.sendData(data);
             tg.close();
         });
